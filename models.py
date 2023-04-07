@@ -111,47 +111,17 @@ class Linear(object):
             self.output[drop < (1 - self.drop_rate)] = 0.0
         if self.activation and (self.activ != 'softmax' or mode == 'test'):
             self.output = self.activation(self.output)
-        # print('Linear forward:')
-        # print('\tinput: {}'.format(self.input.shape))
-        # print('\tweights: {}'.format(self.weights.shape))
-        # print('\tbias: {}'.format(self.bias.shape))
-        # print('\toutput: {}'.format(self.output.shape))
         return self.output
 
     def backward(self, delta):
-        # print('Linear backward:')
-        # print('\tself.input: {}'.format(self.input.shape))
-        # print('\tself.weights: {}'.format(self.weights.shape))
-        # print('\tself.bias: {}'.format(self.bias.shape))
-        # print('\tnp.atleast_2d(self.input).T: {}'.format(np.atleast_2d(self.input).T.shape))
-        # print('\tnp.atleast_2d(delta): {}'.format(np.atleast_2d(delta).shape))
-        # print('\tdelta: {}'.format(delta.shape))
-        # print('\tnp.mean(delta,axis=0): {}'.format(np.mean(delta,axis=0).shape))
-        # print('\tnp.mean(delta,axis=1): {}'.format(np.mean(delta,axis=1).shape))
         self.grad_w = np.atleast_2d(self.input).T.dot(np.atleast_2d(delta))
         self.grad_b = np.mean(delta, axis=0)
-        # print('\tgrad_w: {}'.format(self.grad_w.shape))
-        # print('\tgrad_b: {}'.format(self.grad_b.shape))
-        # print('\tdelta: {}'.format(delta.shape))
-        # print('\tself.weights.T: {}'.format(self.weights.T.shape))
         if self.activation_deriv:
             delta = delta.dot(self.weights.T) * self.activation_deriv(self.input)
-            # print('\tself.activation_deriv(self.input): {}'.format(self.activation_deriv(self.input).shape))
-        # else:
-            # delta = delta.dot(self.weights.T) * self.input
         return delta
 
     def update(self, lr):
-        # print('Linear update:')
-        # print('\tweights: {}'.format(self.weights.shape))
-        # print('\tbias: {}'.format(self.bias.shape))
-        # print('\tgrad_w: {}'.format(self.grad_w.shape))
-        # print('\tgrad_b: {}'.format(self.grad_b.shape))
-
         if self.momentum:
-            # print('\tmomentum: {}'.format(self.momentum))
-            # print('\tprevious_update: {}'.format(self.previous_update.shape))
-            # print('\tmomentum * previous_update: {}'.format(self.momentum * self.previous_update))
             self.previous_update = (self.momentum * self.previous_update) + (lr * self.grad_w)
             self.weights -= self.previous_update
             self.bias -= (lr * self.grad_b)
@@ -159,14 +129,7 @@ class Linear(object):
             self.weights -= (lr * self.grad_w)
             self.bias -= (lr * self.grad_b)
         if self.weight_decay:
-            # print('\tweights: {}'.format(self.weights))
-            # print('\tbias: {}'.format(self.bias))
             self.weights = self.weights - (self.weight_decay * self.weights)
-            # self.bias = (1 - self.weight_decay) * self.bias
-            # print('\tweight_decay: {}'.format(self.weight_decay))
-            # print('\t1 - weight_decay: {}'.format(1 - self.weight_decay))
-            # print('\tweights: {}'.format(self.weights))
-            # print('\tbias: {}'.format(self.bias))
 
 class BatchNorm(object):
     def __init__(self, n_features, epsilon):
@@ -180,7 +143,6 @@ class BatchNorm(object):
         self.layer_var = np.zeros(n_features,)
 
     def forward(self, x, mode, momentum=0.9):
-        # print('BN forward:')
         if mode == 'train':
             self.x_input = x
             self.x_mean = np.mean(self.x_input, axis=0)
@@ -195,19 +157,9 @@ class BatchNorm(object):
         elif mode == 'test':
             norm = (x - self.layer_mean) / np.sqrt(self.layer_var + self.epsilon)
             output = self.gamma * norm + self.beta
-        # print('\tself.x_input: {}'.format(self.x_input.shape))
-        # print('\tself.x_mean: {}'.format(self.x_mean.shape))
-        # print('\tself.x_var: {}'.format(self.x_var.shape))
-        # print('\tself.layer_mean: {}'.format(self.layer_mean.shape))
-        # print('\tself.layer_var: {}'.format(self.layer_var.shape))
-        # print('\tself.x_norm: {}'.format(self.x_norm.shape))
-        # print('\tself.gamma: {}'.format(self.gamma.shape))
-        # print('\tself.beta: {}'.format(self.beta.shape))
-        # print('\toutput: {}'.format(output.shape))
         return output
 
     def backward(self, delta):
-        # print('BN backward:')
         self.grad_beta = np.sum(delta, axis=0)
         self.grad_gamma = np.sum(delta*self.x_norm, axis=0)
 
@@ -215,33 +167,10 @@ class BatchNorm(object):
         t = 1./np.sqrt(self.x_var + self.epsilon)
         m = self.x_input.shape[0]
 
-        # print('\tt: {}'.format(t.shape))
-        # print('\tself.gamma: {}'.format(self.gamma.shape))
-        # print('\t(self.gamma*t/m): {}'.format((self.gamma*t/m).shape))
-        # print('\t(m * delta): {}'.format((m * delta).shape))
-        # print('\tnp.sum(delta, axis=0): {}'.format(np.sum(delta, axis=0).shape))
-        # print('\tt**2: {}'.format((t**2).shape))
-        # print('\t(self.x_input - self.x_mean): {}'.format((self.x_input - self.x_mean).shape))
-        # print('\t(self.x_input - self.x_mean): {}'.format((self.x_input - self.x_mean)))
-        # print('\tdelta: {}'.format(delta))
-        # print('\tdelta*(self.x_input - self.x_mean): {}'.format((delta*(self.x_input - self.x_mean)).shape))
-        # print('\tnp.sum(delta*(self.x_input - self.x_mean), axis=1): {}'.format(np.sum(delta*(self.x_input - self.x_mean), axis=0).shape))
-        # print('\tself.x_input - self.x_mean) * np.sum(delta*(self.x_input - self.x_mean), axis=0): {}'.format(((self.x_input - self.x_mean) * np.sum(delta*(self.x_input - self.x_mean), axis=0)).shape))
-        # print('\tt**2 * (self.x_input - self.x_mean) * np.sum(delta*(self.x_input - self.x_mean), axis=0): {}'.format((t**2 * (self.x_input - self.x_mean) * np.sum(delta*(self.x_input - self.x_mean), axis=0)).shape))
-        # print('\t(m * delta - np.sum(delta, axis=0) - t**2 * (self.x_input - self.x_mean) * np.sum(delta*(self.x_input - self.x_mean), axis=0)): {}'.format((m * delta - np.sum(delta, axis=0) - t**2 * (self.x_input - self.x_mean) * np.sum(delta*(self.x_input - self.x_mean), axis=0)).shape))
-
         delta = (self.gamma*t/m) * (m * delta - np.sum(delta, axis=0) - t**2 * (self.x_input - self.x_mean) * np.sum(delta*(self.x_input - self.x_mean), axis=0))
-
-        # dx = (((delta * self.gamma) / np.sqrt(self.x_var + self.epsilon)) + (2 * (self.x_input - self.x_mean) * (1. /delta.shape[0] * np.ones(delta.shape) * (0.5 * 1. /np.sqrt(self.x_var + self.epsilon) * (1. /(np.sqrt(self.x_var + self.epsilon)**2) * (np.sum((delta * self.gamma)*(self.x_input - self.x_mean), axis=0))))))) + (1. /delta.shape[0] * np.ones(delta.shape) * (-1 * np.sum(dxmu1+dxmu2, axis=0)))
 
         return delta
 
     def update(self, lr):
-        # print('BN update:')
-        # print('\tgamma: {}'.format(self.gamma.shape))
-        # print('\tbeta: {}'.format(self.beta.shape))
-        # print('\tdgamma: {}'.format(self.dgamma.shape))
-        # print('\tdbeta: {}'.format(self.dbeta.shape))
-
         self.gamma -= lr * self.grad_gamma
         self.beta -= lr * self.grad_beta

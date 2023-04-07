@@ -43,16 +43,10 @@ class Activation(object):
         return exp/np.sum(exp)
 
 def MSELoss(y, y_hat, activ='tanh'):
-    # print('MSELoss:')
-    # print('\ty: {}'.format(y.shape))
-    # print('\ty_hat: {}'.format(y_hat.shape))
     error = y - y_hat
-    # print('\terror: {}'.format(error.shape))
     loss = np.mean(error**2)
-    # print('\tloss: {}'.format(loss.shape))
     activ_deriv = Activation(activ).f_deriv
     delta = -error * activ_deriv(y_hat)
-    # print('\tdelta: {}'.format(delta.shape))
     return loss, delta
 
 def softmax(x):
@@ -60,44 +54,12 @@ def softmax(x):
     return exp/np.sum(exp)
 
 def CrossEntropyLoss(y, y_hat):
-    # print(y_hat)
-    # y_hat_sf = softmax(y_hat)
-    # y_hat = np.clip(y_hat, 1e-12, 1. - 1e-12)
-    # a = np.array([-1,2,3])
-    # print(a)
-    # print(softmax(a))
-    # print(np.sum(softmax(a)))
-    # print(y)
-    # print(y_hat)
-    # print(np.sum(y_hat))
-    # print(y_hat[range(y.shape[0]),y.argmax(axis=1)])
-    # print(-np.log(y_hat[range(y.shape[0]),y.argmax(axis=1)]))
-    # print(np.sum(-np.log(y_hat[range(y.shape[0]),y.argmax(axis=1)])))
-    # print(np.sum(-np.log(y_hat[range(y.shape[0]),y.argmax(axis=1)]))/y.shape[0])
-    # log_liklihood = -np.log()
     loss = np.sum(-np.log(y_hat[range(y.shape[0]),y.argmax(axis=1)]))/y.shape[0]
-    # print(loss)
-    # print(y_hat)
-    # print(np.sum(y_hat))
-    # y_hat[range(y.shape[0]),y.argmax(axis=1)] -= 1
-    # print(y_hat)
-    # print(np.sum(y_hat))
-    # delta = y_hat/y.shape[0]
-    # delta = y_hat
-    # print(y)
     delta = y_hat - y
-    # print(delta)
     return loss, delta
 
 def SoftmaxCrossEntropyLoss(y, y_hat):
-    # print('SoftmaxCrossEntropyLoss:')
-    # print('\ty: {}'.format(y.shape))
-    # print('\ty_hat: {}'.format(y_hat.shape))
     y_sf = softmax(y_hat)
-    # print('\tp: {}'.format(y_sf.shape))
-    # print('\tnp.log(y_sf): {}'.format(np.log(y_sf).shape))
     loss = -np.sum(y * np.log(y_sf))/y.shape[0]
-    # print('\tloss: {}'.format(loss))
     delta = y_sf - y
-    # print('\tdelta: {}'.format(delta.shape))
     return loss, delta
